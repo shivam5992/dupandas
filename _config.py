@@ -16,4 +16,4 @@ data = {
 	'columns' : columns,
 	'clean_config' : clean_config
 }
-cleanup(data)
+clean = cleanup(data)
