@@ -52,4 +52,7 @@ class matcher:
 
 		## sort and return the id pairs 
 
+if __name__ == '__main__':
+	matcher()
+
 
