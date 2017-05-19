@@ -11,6 +11,12 @@ clean_config = {
 	'digits' : True
 }
 
+match_config = {
+	'exact' : True,
+	'levenshtein' : True,
+	'soundex' : True
+}
+
 data = {
 	'inp_df' : inp_df,
 	'columns' : columns,
