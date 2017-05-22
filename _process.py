@@ -1,5 +1,5 @@
-from Levenshtein import ratio as lev_ratio
 import pandas as pd 
+from Levenshtein import ratio as lev_ratio
 
 class cleanup:
 	def __init__(self, data, clean_config):
