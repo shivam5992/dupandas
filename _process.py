@@ -31,72 +31,93 @@ class Cleaner:
 
 ## control - clean and match separate 
 class Matcher:
-	def __init__(self, config):
+	def __init__(self):
 
-		match_config = {
-			'exact' : True,
-			'levenshtein' : True,
-			'soundex' : True
+		## Handle for multiple columns 
+		## Add cleaning code 
+		## Add Multiple Matching Algos - 
+		## todos 
+
+		self.clean_config = {
+			'lower' : True,
+			'punctuation' : True,
+			'whitespace' : True,
+			'digits' : True
 		}
 
-		data = {
-			'inp_df' : inp_df,
-			'columns' : columns,
-			'clean_config' : clean_config
+		self.match_config = {
+			'exact_math' : True,
+			'levenshtein_ratio' : True,
+			'soundex' : True,
+			'metaphone' : True, 
+			'Jaro' : True,
 		}
 
-	def levenshtein_match(self, text1, text2):
-		return ratio(text1, text2)
+	def clean_records():
+		pass
 
-	def match_records(self, _row, colname):
+	def match_records():
 		text1 = str(_row[colname])
 		text2 = str(_row[colname+"_"])	
 		
 		conf = 0
-		conf += self.levenshtein_match(text1, text2)
-		## Add other matche algos here
-
+		conf += ratio(text1, text2)
+		
 		return conf 
 
-
-	## Handle for multiple columns 
-	def process(self, input_config):
-		if 'colname' in input_config:
-			colname = input_config['colname']
+	def process_records(self, _row, colname):
+		cleaned = clean_records() 
+		matched = match_records()
+ 
+	def dedupe(self, input_config):
+		if 'column' in input_config:
+			colname = input_config['column']
 		else:
 			print ("Terminating!, Key not found - 'colname'")
+			exit (0)
+
+		if '_id' in input_config:
+			_id = input_config['_id']
+		else:
+			print ("Terminating!, Key not found - '_id'")
+			exit (0)
 
 		if 'input_data' in input_config:
-			inputDF = input_config['input_data']
+			input_df = input_config['input_data']
 		else:
 			print ("Terminating!, Key not found - 'input_data'")
+			exit (0)
 
-		if 'score_column_name' in input_config:
-			scr_colname = input_config['score_column_name']
+		if 'score_column' in input_config:
+			scr_colname = input_config['score_column']
 		else:
-			print ('Key not found - "score_column_name", creating column "confidence_score"')
-			scr_colname = 'confidence_score'
+			print ('Key not found - "score_column", creating column "_score"')
+			scr_colname = '_score'
 
-		## todo - check for multiple columns
+		if 'threshold' in input_config:
+			threshold = input_config['threshold']
+		else:
+			threshold = 0.0
 
 		# Create another dataframe with same column
-		tempDF = pd.DataFrame()
-		tempDF[colname+"_"] = inputDF[colname]
+		temp_df = pd.DataFrame()
+		temp_df[_id+"_"] = input_df[_id]
+		temp_df[colname+"_"] = input_df[colname]
 
 		# Create Cartesian Products
 		cartesian_index = '_i_n_d_e_x'
-		inputDF[cartesian_index] = 0
-		tempDF[cartesian_index] = 0
-		cartesian_pairs = pd.merge(inputDF, tempDF, on=cartesian_index)
+		input_df[cartesian_index] = 0
+		temp_df[cartesian_index] = 0
+		pairs = pd.merge(input_df, temp_df, on=cartesian_index)
 
 		# Matching Process
-		cartesian_pairs[scr_colname] = cartesian_pairs.apply(lambda row: self.match_records(row, colname), axis=1)
-		cartesian_pairs = cartesian_pairs.sort_values([scr_colname], ascending=[False])
+		pairs[scr_colname] = pairs.apply(lambda row: self.process_records(row, colname), axis=1)
+		pairs = pairs.sort_values([scr_colname], ascending=[False])
+		pairs = pairs[pairs[scr_colname] >= threshold]
+		pairs = pairs[pairs[_id] != pairs[_id+"_"]]
 
-		# Drop Temporary Index column
-		drop = [cartesian_index]
-		cartesian_pairs = cartesian_pairs.drop(drop, axis=1)
-
-		return cartesian_pairs
-
-
+		# Create output data frame
+		output = pd.DataFrame()
+		output[_id] = pairs[_id]
+		output[_id+"_"] = pairs[_id+"_"]
+		return output
