@@ -1,7 +1,7 @@
 import pandas as pd 
-from Levenshtein import ratio as lev_ratio
+from Levenshtein import ratio
 
-class cleanup:
+class Cleaner:
 	def __init__(self, data, clean_config):
 		self.clean_config = clean_config
 		self.columns = data['columns']
@@ -30,9 +30,23 @@ class cleanup:
 		
 
 ## control - clean and match separate 
-class matcher:
+class Matcher:
+	def __init__(self, config):
+
+		match_config = {
+			'exact' : True,
+			'levenshtein' : True,
+			'soundex' : True
+		}
+
+		data = {
+			'inp_df' : inp_df,
+			'columns' : columns,
+			'clean_config' : clean_config
+		}
+
 	def levenshtein_match(self, text1, text2):
-		return lev_ratio(text1, text2)
+		return ratio(text1, text2)
 
 	def match_records(self, _row, colname):
 		text1 = str(_row[colname])
@@ -46,33 +60,43 @@ class matcher:
 
 
 	## Handle for multiple columns 
-	def process(self, colname, DF1):
+	def process(self, input_config):
+		if 'colname' in input_config:
+			colname = input_config['colname']
+		else:
+			print ("Terminating!, Key not found - 'colname'")
+
+		if 'input_data' in input_config:
+			inputDF = input_config['input_data']
+		else:
+			print ("Terminating!, Key not found - 'input_data'")
+
+		if 'score_column_name' in input_config:
+			scr_colname = input_config['score_column_name']
+		else:
+			print ('Key not found - "score_column_name", creating column "confidence_score"')
+			scr_colname = 'confidence_score'
+
+		## todo - check for multiple columns
 
 		# Create another dataframe with same column
-		# check for multiple columns
-		DF2 = pd.DataFrame()
-		DF2[colname+"_"] = DF1[colname]
+		tempDF = pd.DataFrame()
+		tempDF[colname+"_"] = inputDF[colname]
 
 		# Create Cartesian Products
 		cartesian_index = '_i_n_d_e_x'
-		DF1[cartesian_index] = 0
-		DF2[cartesian_index] = 0
-		cartesian_pairs = pd.merge(DF1, DF2, on=cartesian_index)
+		inputDF[cartesian_index] = 0
+		tempDF[cartesian_index] = 0
+		cartesian_pairs = pd.merge(inputDF, tempDF, on=cartesian_index)
 
 		# Matching Process
-		cartesian_pairs['confidence_score'] = cartesian_pairs.apply(lambda row: self.match_records(row, colname), axis=1)
-		cartesian_pairs = cartesian_pairs.sort_values(['confidence_score'], ascending=[False])
+		cartesian_pairs[scr_colname] = cartesian_pairs.apply(lambda row: self.match_records(row, colname), axis=1)
+		cartesian_pairs = cartesian_pairs.sort_values([scr_colname], ascending=[False])
 
+		# Drop Temporary Index column
 		drop = [cartesian_index]
 		cartesian_pairs = cartesian_pairs.drop(drop, axis=1)
 
 		return cartesian_pairs
 
 
-if __name__ == '__main__':
-
-	df1 = pd.read_csv('data/data1.csv')
-
-	match = matcher()
-	results = match.process('city', df1)
-	results.to_csv('test.csv', index=False)
