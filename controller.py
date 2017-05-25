@@ -1,4 +1,4 @@
-from _process import Matcher
+from _process import Dedupe
 import pandas as pd 
 
 clean_config = {
@@ -16,7 +16,7 @@ match_config = {
 	'Jaro' : True,
 }
 
-match = Matcher(clean_config = clean_config, match_config = match_config)
+dupe = Dedupe(clean_config = clean_config, match_config = match_config)
 
 input_config = {
 	'column' : 'city',
@@ -26,5 +26,5 @@ input_config = {
 	'_id' : 'id'
 }
 
-results = match.dedupe(input_config)
+results = dupe.dedupe(input_config)
 print results

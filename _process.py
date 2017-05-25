@@ -1,75 +1,92 @@
+# Imports for Dedupe
 import pandas as pd 
+
+# Imports for Matcher 
 from Levenshtein import ratio
 
+# Imports for Cleaner 
+import string 
+punctuations = string.punctuation
+
 class Cleaner:
-	def __init__(self, data, clean_config):
-		self.clean_config = clean_config
-		self.columns = data['columns']
-		self.df = data['inp_df']
-
-		for col in self.columns:
-
-			## check if column not in data frame 
-			self.df["cln_"+col] = self.df[col].apply(lambda x : self._clean_tet(x)) 
-
-	def _clean_text(self, txt):
-		txt = str(txt)
-		if self.clean_config['lower']:
-			txt = txt.lower()
-		if self.clean_config['punctuation']:
-			txt = "".join([x for x in txt if x not in exclude])
-		if self.clean_config['whitespace']:
-			txt = "".join(txt.split()).strip()
-		if self.clean_config['digits']:
-			txt = "".join(x for x in txt if x not in "0987654321")
-		return txt
+	def __init__(self, clean_config = None):
 
 		## stopwords, repeated, urls, mentions, hashtags , badchars, small words 
 		## html entities, text encoding, split attached words, unstandardized words
 		## slangs, appostrophes, normalization
 		
-
-## control - clean and match separate 
-class Matcher:
-	def __init__(self):
-
-		## Handle for multiple columns 
-		## Add cleaning code 
-		## Add Multiple Matching Algos - 
-		## todos 
-
-		self.clean_config = {
+		self.cc = {
 			'lower' : True,
 			'punctuation' : True,
 			'whitespace' : True,
 			'digits' : True
 		}
 
+
+	def clean_element(self, txt):
+		txt = str(txt)
+
+		if self.cc['lower']:
+			txt = txt.lower()
+
+		if self.cc['punctuation']:
+			txt = "".join([x for x in txt if x not in punctuations])
+
+		if self.cc['whitespace']:
+			txt = "".join(txt.split()).strip()
+
+		if self.cc['digits']:
+			txt = "".join(x for x in txt if x not in "0987654321")
+
+		return txt
+
+
+class Matcher:
+	def __init__(self, match_config = None):
+
+		## add multiple matching algos 
 		self.match_config = {
-			'exact_math' : True,
-			'levenshtein_ratio' : True,
+			'exact_match' : True,
+			'levenshtein_match' : True,
 			'soundex' : True,
 			'metaphone' : True, 
 			'Jaro' : True,
 		}
 
-	def clean_records():
-		pass
-
-	def match_records():
-		text1 = str(_row[colname])
-		text2 = str(_row[colname+"_"])	
-		
+	def match_elements(self, text1, text2):
 		conf = 0
-		conf += ratio(text1, text2)
+
+		if self.match_config['exact_match']:
+			if text1 == text2:
+				conf += 1
+
+		if self.match_config['levenshtein_match']:
+			conf += ratio(text1, text2)
 		
 		return conf 
+		
 
-	def process_records(self, _row, colname):
-		cleaned = clean_records() 
-		matched = match_records()
+class Dedupe:
+	def __init__(self, clean_config = None, match_config = None):
+		self.clean = Cleaner(clean_config)
+		self.match = Matcher(match_config)
+		## Handle for multiple columns 
+
+
+	def match_records(self, _row_data, colname):
+		text1 = str(_row_data[colname])
+		text2 = str(_row_data[colname+"_"])	
+		match_score = self.match.match_elements(text1, text2)
+		return match_score 
+
+
+	def clean_records(self, _row_data, colname):
+		cleaned = self.clean.clean_element(_row_data[colname])
+		return cleaned
  
+
 	def dedupe(self, input_config):
+		# Conditional Validation Checks 
 		if 'column' in input_config:
 			colname = input_config['column']
 		else:
@@ -99,10 +116,16 @@ class Matcher:
 		else:
 			threshold = 0.0
 
+		# Cleaning Process
+		clean_colname = "_cln_"+colname
+		input_df[clean_colname] = input_df.apply(lambda row_data: self.clean_records(row_data, colname), axis=1)
+		
+
 		# Create another dataframe with same column
 		temp_df = pd.DataFrame()
 		temp_df[_id+"_"] = input_df[_id]
-		temp_df[colname+"_"] = input_df[colname]
+		temp_df[clean_colname+"_"] = input_df[clean_colname]
+
 
 		# Create Cartesian Products
 		cartesian_index = '_i_n_d_e_x'
@@ -110,11 +133,13 @@ class Matcher:
 		temp_df[cartesian_index] = 0
 		pairs = pd.merge(input_df, temp_df, on=cartesian_index)
 
+		
 		# Matching Process
-		pairs[scr_colname] = pairs.apply(lambda row: self.process_records(row, colname), axis=1)
+		pairs[scr_colname] = pairs.apply(lambda row_data: self.match_records(row_data, clean_colname), axis=1)
 		pairs = pairs.sort_values([scr_colname], ascending=[False])
 		pairs = pairs[pairs[scr_colname] >= threshold]
 		pairs = pairs[pairs[_id] != pairs[_id+"_"]]
+
 
 		# Create output data frame
 		output = pd.DataFrame()
