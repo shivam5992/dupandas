@@ -13,15 +13,15 @@ match_config = {
 	'levenshtein_ratio' : True,
 	'soundex' : True,
 	'metaphone' : True, 
-	'Jaro' : True,
+	'jaro' : True,
 }
 
 dupe = Dedupe(clean_config = clean_config, match_config = match_config)
 
 input_config = {
+	'input_data' : pd.read_csv('data/test_data.csv'),
 	'column' : 'city',
-	'input_data' : pd.read_csv('data/data1.csv'),
-	'score_column' : 'confidence_score',
+	'score_column' : 'score',
 	'threshold' : 0.75,
 	'_id' : 'id'
 }

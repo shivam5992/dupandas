@@ -19,7 +19,8 @@ class Cleaner:
 			'lower' : True,
 			'punctuation' : True,
 			'whitespace' : True,
-			'digits' : True
+			'digits' : True,
+			'html' : True
 		}
 
 
@@ -38,6 +39,9 @@ class Cleaner:
 		if self.cc['digits']:
 			txt = "".join(x for x in txt if x not in "0987654321")
 
+		# if self.cc['html']:
+		# 	txt = txt.replace('','')
+
 		return txt
 
 
@@ -50,7 +54,7 @@ class Matcher:
 			'levenshtein_match' : True,
 			'soundex' : True,
 			'metaphone' : True, 
-			'Jaro' : True,
+			'jaro' : True,
 		}
 
 	def match_elements(self, text1, text2):
