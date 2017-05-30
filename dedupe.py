@@ -3,6 +3,9 @@ import pandas as pd
 
 # Imports for Matcher 
 from Levenshtein import ratio
+import fuzzy
+soundex = fuzzy.Soundex(4)
+
 
 # Imports for Cleaner 
 import string 
@@ -50,8 +53,8 @@ class Matcher:
 
 		## add multiple matching algos 
 		self.match_config = {
-			'exact_match' : True,
-			'levenshtein_match' : True,
+			'exact' : True,
+			'levenshtein' : True,
 			'soundex' : True,
 			'metaphone' : True, 
 			'jaro' : True,
@@ -60,12 +63,17 @@ class Matcher:
 	def match_elements(self, text1, text2):
 		conf = 0
 
-		if self.match_config['exact_match']:
+		if self.match_config['exact']:
 			if text1 == text2:
 				conf += 1
 
-		if self.match_config['levenshtein_match']:
+		if self.match_config['levenshtein']:
 			conf += ratio(text1, text2)
+
+		if self.match_config['soundex']:
+			if soundex(text1) == soundex(text2):
+				print text1, text2
+				conf += 1 
 		
 		return conf 
 		

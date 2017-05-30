@@ -1,4 +1,4 @@
-from _process import Dedupe
+from dedupe import Dedupe
 import pandas as pd 
 
 clean_config = {
@@ -18,6 +18,7 @@ match_config = {
 
 dupe = Dedupe(clean_config = clean_config, match_config = match_config)
 
+# unique pairs = True, False 
 input_config = {
 	'input_data' : pd.read_csv('data/test_data.csv'),
 	'column' : 'city',
