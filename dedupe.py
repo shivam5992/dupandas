@@ -2,10 +2,10 @@
 import pandas as pd 
 
 # Imports for Matcher 
-from Levenshtein import ratio
 import fuzzy
 soundex = fuzzy.Soundex(4)
 
+from Levenshtein import ratio
 
 # Imports for Cleaner 
 import string 
@@ -50,18 +50,11 @@ class Cleaner:
 
 class Matcher:
 	def __init__(self, match_config = None):
-
-		# normalize confidence score (0 to 100)
-
-		## more matching configs 
 		self.m_config = {
 			'exact' : False, 
 			'levenshtein' : False,
 			'soundex' : False,
 			'nysiis' : False, 
-
-			'jaro' : False,
-			'metaphone' : False
 		}
 
 		# Override match config 
@@ -107,8 +100,6 @@ class Dedupe:
 	def __init__(self, clean_config = None, match_config = None):
 		self.clean = Cleaner(clean_config)
 		self.match = Matcher(match_config)
-		## Handle for multiple columns 
-
 
 	def match_records(self, _row_data, colname):
 		text1 = str(_row_data[colname])
@@ -120,49 +111,91 @@ class Dedupe:
 	def clean_records(self, _row_data, colname):
 		cleaned = self.clean.clean_element(_row_data[colname])
 		return cleaned
- 
 
-	def dedupe(self, input_config):
+	def validate_config(self, input_config):
+		invalid_input = False
 
-		# Conditional Validation Checks 
-		if 'column' in input_config:
-			colname = input_config['column']
-		else:
-			print ("! Terminating!, Key not found - 'colname'")
-			exit (0)
+		# Mandatory Key Check 	
+		mandates = ['column', '_id', 'input_data']
+		for mandate in mandates:
+			if mandate not in input_config:
+				print ("Key not found - '"+mandate+"'")
+				invalid_input = True
+			else:
+				input_df = input_config['input_data']
+		
+		# Datatype Check 
+		for each in input_config:
+			if each == 'threshold':
+				if 'float' not in  str(type(input_config[each])):
+					threshold = 0.0
+					print ("Invalid Type: " + str(type(input_config[each])) + ", for " +
+										 str(each) + " need float, setting default: 0.0")
+				elif not (input_config[each] >= 0 and input_config[each] <= 1):
+					threshold = 0.0
+					print ("Key threshold should be between 0.0 and 1.0, setting default: 0.0")
+				else:
+					threshold = input_config[each]
+			elif each == 'input_data':
+				if 'pandas.core.frame.DataFrame' not in str(type(input_config[each])):
+					invalid_input = True
+					print ("Invalid type " + str(type(input_config[each])) + ", for " + 
+													str(each) + " need Pandas_Data_Frame")
+			elif 'str' not in str(type(input_config[each])):
+				print ("Invalid type " + str(type(input_config[each])) + ", for " + str(each) + " need str")
+				invalid_input = True
 
-		if '_id' in input_config:
-			_id = input_config['_id']
-		else:
-			print ("! Terminating!, Key not found - '_id'")
-			exit (0)
 
-		if 'input_data' in input_config:
-			input_df = input_config['input_data']
-		else:
-			print ("! Terminating!, Key not found - 'input_data'")
-			exit (0)
+		## Availability Check
+		keys = ['_id', 'column']
+		for key in keys:
+			if input_config[key] not in input_config['input_data']:
+				print ("Column not present in dataframe: " + str(key))
+				invalid_input = True
 
+
+		if invalid_input:
+			print ("Terminating !!!")
+			exit(0)
+
+		input_data = input_config['input_data']
+		colname = input_config['column']
+		_id = input_config['_id']
+		
+		scr_colname = '_score'
 		if 'score_column' in input_config:
 			scr_colname = input_config['score_column']
-		else:
-			print ('! Key not found - "score_column", creating column "_score"')
-			scr_colname = '_score'
 
-		if 'threshold' in input_config:
-			threshold = input_config['threshold']
-		else:
-			threshold = 0.0
+		config ={
+			'scr_colname' : scr_colname,
+			'_id' : _id,
+			'colname' : colname,
+			'input_data' : input_data,
+			'threshold' : threshold
+
+		}
+		return config
+			
+	def dedupe(self, input_config):
+
+		config = self.validate_config(input_config)
+
+		colname = config['colname']
+		input_df = config['input_data']
+		threshold = config['threshold']
+		_id = config['_id']
+		scr_colname = config['scr_colname']
+
 
 		# Cleaning Process
-		clean_colname = "_cln_"+colname
-		input_df[clean_colname] = input_df.apply(lambda row_data: self.clean_records(row_data, colname), axis=1)
+		cln_col = "_cln_"+colname
+		input_df[cln_col] = input_df.apply(lambda row: self.clean_records(row, colname), axis=1)
 		
 
 		# Create another dataframe with same column
 		temp_df = pd.DataFrame()
 		temp_df[_id+"_"] = input_df[_id]
-		temp_df[clean_colname+"_"] = input_df[clean_colname]
+		temp_df[cln_col+"_"] = input_df[cln_col]
 
 
 		# Create Cartesian Products
@@ -173,7 +206,7 @@ class Dedupe:
 
 		
 		# Matching Process
-		pairs[scr_colname] = pairs.apply(lambda row_data: self.match_records(row_data, clean_colname), axis=1)
+		pairs[scr_colname] = pairs.apply(lambda row: self.match_records(row, cln_col), axis=1)
 		pairs = pairs.sort_values([scr_colname], ascending=[False])
 		pairs = pairs[pairs[scr_colname] >= threshold]
 		pairs = pairs[pairs[_id] != pairs[_id+"_"]]
@@ -184,4 +217,4 @@ class Dedupe:
 		output[_id] = pairs[_id]
 		output[_id+"_"] = pairs[_id+"_"]
 		output[scr_colname] = pairs[scr_colname]
-		return output
+		return output		
