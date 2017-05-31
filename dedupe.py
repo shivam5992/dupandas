@@ -177,7 +177,6 @@ class Dedupe:
 		return config
 			
 	def dedupe(self, input_config):
-
 		config = self.validate_config(input_config)
 
 		colname = config['colname']
