@@ -11,23 +11,103 @@ from Levenshtein import ratio
 import string 
 punctuations = string.punctuation
 
-class Cleaner:
-	def __init__(self, clean_config = None):
 
-		## stopwords, repeated, urls, mentions, hashtags , badchars, small words 
-		## html entities, text encoding, split attached words, unstandardized words
-		## slangs, appostrophes, normalization, text encodings 
-		
+class Matcher:
+	"""
+		python class for matching text records using different matching criterions. Currently, 
+		exact matching, levenshtein match, soundex and nysiis are supported. 
+
+		use: default configuration
+
+		match = Matcher()
+		score = match.match_elements(text1, text2)
+		# returns the confidence score of exact match between two strings 
+	
+		use: custom configuration
+
+		match_config = {
+			'exact' : True, 'levenshtein' : True, 'soundex' : True, 'nysiis' : True
+		}
+		match = Matcher(match_config)
+		score = match.match_elements(text1, text2)
+		# returns the confidence score of flexible match between two strings using criterions mentioned
+	"""
+
+	def __init__(self, match_config = None):
+		self.m_config = {
+			'exact' : False, 
+			'levenshtein' : False,
+			'soundex' : False,
+			'nysiis' : False, 
+		}
+
+		# Override match config and validation check
+		for key, value in match_config.iteritems():
+			if key in self.m_config:
+				if value not in [True, False,1,0]:
+					print ("Invalid: Incorrect boolean value: "+str(value)+" for key: " + str(key))
+				else:
+					self.m_config[key] = value
+			else:
+				print ("Invalid: Matcher Not Recognized: " + str(key) + ", available Matchers: " +
+																	 ", ".join(self.m_config.keys()))
+
+		matcher_applied = [key for key in self.m_config if self.m_config[key]]
+		if matcher_applied:
+			print ("Applying Matchers: " + ", ".join(matcher_applied))
+		else:
+			self.m_config['exact'] = True
+			print ("Invalid: No matchers in config, applying default: exact match")
+ 
+	def match_elements(self, text1, text2):
+		"""
+		utility function to match two strings, makes use of 
+		match config initiated in __init__ 
+
+		returns the output as confidence score of flexible match
+		"""
+
+		conf = 0
+		if self.m_config['exact']:
+			if text1 == text2:
+				conf += 1
+			 
+		if self.m_config['levenshtein']:
+			conf += ratio(text1, text2)
+			  
+		if self.m_config['soundex']:
+			if soundex(text1) == soundex(text2):
+				conf += 1
+			  
+		if self.m_config['nysiis']:
+			if fuzzy.nysiis(text1) == fuzzy.nysiis(text2):
+				conf += 1
+			 
+		return conf
+
+
+class Cleaner:
+	"""
+	python class to clean a text using different conditions - 
+	uses clean config to perform cleaning on text 
+
+	lower casing, punctuations, whitespace removal, digit removal, html removal etc. 
+	"""
+
+	def __init__(self, clean_config = None):
 		self.cc = {
 			'lower' : True,
 			'punctuation' : True,
 			'whitespace' : True,
 			'digits' : True,
-			'html' : True
 		}
 
 
 	def clean_element(self, txt):
+		"""
+		function to clean a text on the basis of configurations mentioned in clean config.
+		"""
+
 		txt = str(txt)
 
 		if self.cc['lower']:
@@ -42,89 +122,52 @@ class Cleaner:
 		if self.cc['digits']:
 			txt = "".join(x for x in txt if x not in "0987654321")
 
-		# if self.cc['html']:
-		# 	txt = txt.replace('','')
-
 		return txt
 
 
-class Matcher:
-	def __init__(self, match_config = None):
-		self.m_config = {
-			'exact' : False, 
-			'levenshtein' : False,
-			'soundex' : False,
-			'nysiis' : False, 
-		}
-
-		# Override match config 
-		for key, value in match_config.iteritems():
-			if key in self.m_config:
-				if value not in [True, False,1,0]:
-					print ("Invalid: Incorrect boolean value: "+str(value)+" for key: " + str(key))
-				else:
-					self.m_config[key] = value
-			else:
-				print ("Invalid: Matcher Not Recognized: " + str(key) + ", available Matchers: " + ", ".join(self.m_config.keys()))
-
-		matcher_applied = [key for key in self.m_config if self.m_config[key]]
-		if matcher_applied:
-			print ("Applying Matchers: " + ", ".join(matcher_applied))
-		else:
-			self.m_config['exact'] = True
-			print ("Invalid: No matchers in config, applying default: exact match")
- 
-	def match_elements(self, text1, text2):
-		conf = 0
-		 
-
-		if self.m_config['exact']:
-			if text1 == text2:
-				conf += 1
-			 
-
-		if self.m_config['levenshtein']:
-			conf += ratio(text1, text2)
-			  
-
-		if self.m_config['soundex']:
-			if soundex(text1) == soundex(text2):
-				conf += 1
-			  
-
-		if self.m_config['nysiis']:
-			if fuzzy.nysiis(text1) == fuzzy.nysiis(text2):
-				conf += 1
-			 
-		return conf
-		
-
 class Dedupe:
-	#### todos 
-	# comented code 
+	"""
+		python class to deduplicate columns of a pandas data frame, 
+		currently it supports single coulmn deduplication only. 
 
-	# Config - unique pairs = True, False 
-	# Add Support for Multi Column Match
-	# Add other matching algos - jaro, metaphone
-	# Add More Cleaning Functions 
-
+		makes use of Cleaner and Matcher class for text cleaning and matching purposes
+	"""
 
 	def __init__(self, clean_config = None, match_config = None):
 		self.clean = Cleaner(clean_config)
 		self.match = Matcher(match_config)
 
 	def match_records(self, _row_data, colname):
+		""" 
+		function to obtain column values from two columns and apply matching functions
+		"""
+		
 		text1 = str(_row_data[colname])
 		text2 = str(_row_data[colname+"_"])	
 		match_score = self.match.match_elements(text1, text2)
 		return match_score 
 
-
 	def clean_records(self, _row_data, colname):
+		""" 
+		function to obtain column value from relevant column and apply cleaning functions
+		"""
+
 		cleaned = self.clean.clean_element(_row_data[colname])
 		return cleaned
 
 	def validate_config(self, input_config):
+		"""
+		function to validate the input_config provided while calling deduplication process
+
+		validation checks: 
+
+		mandatory fields: colname, _id, input_data
+		datatype checks: input_data should be pandas dataframe, 
+						 threshold should be float,
+						 every other value should be str
+		availability checks: _id and colname should exist in input_data
+		"""
+
 		invalid_input = False
 
 		# Mandatory Key Check 	
@@ -143,9 +186,6 @@ class Dedupe:
 					threshold = 0.0
 					print ("Invalid: Type: " + str(type(input_config[each])) + " not recognized for " +
 										 str(each) + " need float, setting default: 0.0")
-				elif not (input_config[each] >= 0 and input_config[each] <= 1):
-					threshold = 0.0
-					print ("Invalid: threshold should be between 0.0 and 1.0, setting default: 0.0")
 				else:
 					threshold = input_config[each]
 			elif each == 'input_data':
@@ -165,7 +205,7 @@ class Dedupe:
 				print ("Invalid: column - " + str(key) + " not found")
 				invalid_input = True
 
-
+		## Terminate if validation is failed
 		if invalid_input:
 			print ("Terminating !!!")
 			exit(0)
@@ -174,6 +214,7 @@ class Dedupe:
 		if 'score_column' in input_config:
 			scr_colname = input_config['score_column']
 
+		## Create final validated input configuration
 		config = {
 			'scr_colname' : scr_colname,
 			'_id' : input_config['_id'],
@@ -184,6 +225,18 @@ class Dedupe:
 		return config
 			
 	def dedupe(self, input_config):
+		""" 
+		master function to perform deduplication on pandas column using flexible string matching
+		uses Cleaner and Matcher class
+
+		Flow: 
+			- perform cleaning on the desired column
+			- create duplicate cleaned column
+			- create cartesian pairs of cleaned column and its duplicate
+			- perform matching functions and return the score
+			- create and return output dataframe
+		"""
+
 		config = self.validate_config(input_config)
 
 		colname = config['colname']
@@ -223,4 +276,4 @@ class Dedupe:
 		output[_id] = pairs[_id]
 		output[_id+"_"] = pairs[_id+"_"]
 		output[scr_colname] = pairs[scr_colname]
-		return output		
+		return output
