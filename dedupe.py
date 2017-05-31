@@ -61,42 +61,54 @@ class Matcher:
 		for key, value in match_config.iteritems():
 			if key in self.m_config:
 				if value not in [True, False,1,0]:
-					print ("! Invalid Boolean: "+str(value)+", Matcher key: " + str(key))
+					print ("Invalid: Incorrect boolean value: "+str(value)+" for key: " + str(key))
 				else:
 					self.m_config[key] = value
 			else:
-				print ("! Matcher Not Recognized, " + str(key))
-				print ("! Available Matchers: " + ", ".join(self.m_config.keys()))
+				print ("Invalid: Matcher Not Recognized: " + str(key) + ", available Matchers: " + ", ".join(self.m_config.keys()))
 
 		matcher_applied = [key for key in self.m_config if self.m_config[key]]
 		if matcher_applied:
 			print ("Applying Matchers: " + ", ".join(matcher_applied))
 		else:
 			self.m_config['exact'] = True
-			print ("No Matchers in config, Applying Default Matcher: exact match")
+			print ("Invalid: No matchers in config, applying default: exact match")
  
 	def match_elements(self, text1, text2):
 		conf = 0
+		 
 
 		if self.m_config['exact']:
 			if text1 == text2:
 				conf += 1
+			 
 
 		if self.m_config['levenshtein']:
 			conf += ratio(text1, text2)
+			  
 
 		if self.m_config['soundex']:
 			if soundex(text1) == soundex(text2):
-				conf += 1 
+				conf += 1
+			  
 
 		if self.m_config['nysiis']:
 			if fuzzy.nysiis(text1) == fuzzy.nysiis(text2):
-				conf += 1 
-
-		return conf 
+				conf += 1
+			 
+		return conf
 		
 
 class Dedupe:
+	#### todos 
+	# comented code 
+
+	# Config - unique pairs = True, False 
+	# Add Support for Multi Column Match
+	# Add other matching algos - jaro, metaphone
+	# Add More Cleaning Functions 
+
+
 	def __init__(self, clean_config = None, match_config = None):
 		self.clean = Cleaner(clean_config)
 		self.match = Matcher(match_config)
@@ -129,20 +141,20 @@ class Dedupe:
 			if each == 'threshold':
 				if 'float' not in  str(type(input_config[each])):
 					threshold = 0.0
-					print ("Invalid Type: " + str(type(input_config[each])) + ", for " +
+					print ("Invalid: Type: " + str(type(input_config[each])) + " not recognized for " +
 										 str(each) + " need float, setting default: 0.0")
 				elif not (input_config[each] >= 0 and input_config[each] <= 1):
 					threshold = 0.0
-					print ("Key threshold should be between 0.0 and 1.0, setting default: 0.0")
+					print ("Invalid: threshold should be between 0.0 and 1.0, setting default: 0.0")
 				else:
 					threshold = input_config[each]
 			elif each == 'input_data':
 				if 'pandas.core.frame.DataFrame' not in str(type(input_config[each])):
 					invalid_input = True
-					print ("Invalid type " + str(type(input_config[each])) + ", for " + 
+					print ("Invalid: type " + str(type(input_config[each])) + " not recognized for " + 
 													str(each) + " need Pandas_Data_Frame")
 			elif 'str' not in str(type(input_config[each])):
-				print ("Invalid type " + str(type(input_config[each])) + ", for " + str(each) + " need str")
+				print ("Invalid: Type " + str(type(input_config[each])) + ", for " + str(each) + " need str")
 				invalid_input = True
 
 
@@ -150,7 +162,7 @@ class Dedupe:
 		keys = ['_id', 'column']
 		for key in keys:
 			if input_config[key] not in input_config['input_data']:
-				print ("Column not present in dataframe: " + str(key))
+				print ("Invalid: column - " + str(key) + " not found")
 				invalid_input = True
 
 
@@ -158,21 +170,16 @@ class Dedupe:
 			print ("Terminating !!!")
 			exit(0)
 
-		input_data = input_config['input_data']
-		colname = input_config['column']
-		_id = input_config['_id']
-		
 		scr_colname = '_score'
 		if 'score_column' in input_config:
 			scr_colname = input_config['score_column']
 
-		config ={
+		config = {
 			'scr_colname' : scr_colname,
-			'_id' : _id,
-			'colname' : colname,
-			'input_data' : input_data,
+			'_id' : input_config['_id'],
+			'colname' : input_config['column'],
+			'input_data' : input_config['input_data'],
 			'threshold' : threshold
-
 		}
 		return config
 			
@@ -182,8 +189,8 @@ class Dedupe:
 		colname = config['colname']
 		input_df = config['input_data']
 		threshold = config['threshold']
-		_id = config['_id']
 		scr_colname = config['scr_colname']
+		_id = config['_id']
 
 
 		# Cleaning Process
