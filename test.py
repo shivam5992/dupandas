@@ -9,11 +9,10 @@ clean_config = {
 }
 
 match_config = {
-	'exact_math' : True,
-	'levenshtein_ratio' : True,
-	'soundex' : True,
-	'metaphone' : True, 
-	'jaro' : True,
+	'exact' : False,
+	'levenshtein' : True,
+	'soundex' : False,
+	'nysiis' : False, 
 }
 
 dupe = Dedupe(clean_config = clean_config, match_config = match_config)

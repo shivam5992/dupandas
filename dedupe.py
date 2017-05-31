@@ -16,7 +16,7 @@ class Cleaner:
 
 		## stopwords, repeated, urls, mentions, hashtags , badchars, small words 
 		## html entities, text encoding, split attached words, unstandardized words
-		## slangs, appostrophes, normalization
+		## slangs, appostrophes, normalization, text encodings 
 		
 		self.cc = {
 			'lower' : True,
@@ -51,30 +51,55 @@ class Cleaner:
 class Matcher:
 	def __init__(self, match_config = None):
 
-		## add multiple matching algos 
-		self.match_config = {
-			'exact' : True,
-			'levenshtein' : True,
-			'soundex' : True,
-			'metaphone' : True, 
-			'jaro' : True,
+		# normalize confidence score (0 to 100)
+
+		## more matching configs 
+		self.m_config = {
+			'exact' : False, 
+			'levenshtein' : False,
+			'soundex' : False,
+			'nysiis' : False, 
+
+			'jaro' : False,
+			'metaphone' : False
 		}
 
+		# Override match config 
+		for key, value in match_config.iteritems():
+			if key in self.m_config:
+				if value not in [True, False,1,0]:
+					print ("! Invalid Boolean: "+str(value)+", Matcher key: " + str(key))
+				else:
+					self.m_config[key] = value
+			else:
+				print ("! Matcher Not Recognized, " + str(key))
+				print ("! Available Matchers: " + ", ".join(self.m_config.keys()))
+
+		matcher_applied = [key for key in self.m_config if self.m_config[key]]
+		if matcher_applied:
+			print ("Applying Matchers: " + ", ".join(matcher_applied))
+		else:
+			self.m_config['exact'] = True
+			print ("No Matchers in config, Applying Default Matcher: exact match")
+ 
 	def match_elements(self, text1, text2):
 		conf = 0
 
-		if self.match_config['exact']:
+		if self.m_config['exact']:
 			if text1 == text2:
 				conf += 1
 
-		if self.match_config['levenshtein']:
+		if self.m_config['levenshtein']:
 			conf += ratio(text1, text2)
 
-		if self.match_config['soundex']:
+		if self.m_config['soundex']:
 			if soundex(text1) == soundex(text2):
-				print text1, text2
 				conf += 1 
-		
+
+		if self.m_config['nysiis']:
+			if fuzzy.nysiis(text1) == fuzzy.nysiis(text2):
+				conf += 1 
+
 		return conf 
 		
 
@@ -98,29 +123,30 @@ class Dedupe:
  
 
 	def dedupe(self, input_config):
+
 		# Conditional Validation Checks 
 		if 'column' in input_config:
 			colname = input_config['column']
 		else:
-			print ("Terminating!, Key not found - 'colname'")
+			print ("! Terminating!, Key not found - 'colname'")
 			exit (0)
 
 		if '_id' in input_config:
 			_id = input_config['_id']
 		else:
-			print ("Terminating!, Key not found - '_id'")
+			print ("! Terminating!, Key not found - '_id'")
 			exit (0)
 
 		if 'input_data' in input_config:
 			input_df = input_config['input_data']
 		else:
-			print ("Terminating!, Key not found - 'input_data'")
+			print ("! Terminating!, Key not found - 'input_data'")
 			exit (0)
 
 		if 'score_column' in input_config:
 			scr_colname = input_config['score_column']
 		else:
-			print ('Key not found - "score_column", creating column "_score"')
+			print ('! Key not found - "score_column", creating column "_score"')
 			scr_colname = '_score'
 
 		if 'threshold' in input_config:
@@ -157,4 +183,5 @@ class Dedupe:
 		output = pd.DataFrame()
 		output[_id] = pairs[_id]
 		output[_id+"_"] = pairs[_id+"_"]
+		output[scr_colname] = pairs[scr_colname]
 		return output
