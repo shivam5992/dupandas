@@ -42,23 +42,24 @@ class Matcher:
 		}
 
 		# Override match config and validation check
-		for key, value in match_config.iteritems():
-			if key in self.m_config:
-				if value not in [True, False,1,0]:
-					print ("Invalid: Incorrect boolean value: "+str(value)+" for key: " + str(key))
+		if match_config != None:
+			for key, value in match_config.iteritems():
+				if key in self.m_config:
+					if value not in [True, False,1,0]:
+						print ("Invalid: Incorrect boolean value: "+str(value)+" for key: " + str(key))
+					else:
+						self.m_config[key] = value
 				else:
-					self.m_config[key] = value
-			else:
-				print ("Invalid: Matcher Not Recognized: " + str(key) + ", available Matchers: " +
-																	 ", ".join(self.m_config.keys()))
+					print ("Invalid: Matcher not recognized: " + str(key) + ", available Matchers: " +
+																		 ", ".join(self.m_config.keys()))
 
 		matcher_applied = [key for key in self.m_config if self.m_config[key]]
 		if matcher_applied:
 			print ("Applying Matchers: " + ", ".join(matcher_applied))
 		else:
 			self.m_config['exact'] = True
-			print ("Invalid: No matchers in config, applying default: exact match")
- 
+			print ("Warning: No matchers in config, applying default: exact match")
+ 	
 	def match_elements(self, text1, text2):
 		"""
 		utility function to match two strings, makes use of 
@@ -96,11 +97,30 @@ class Cleaner:
 
 	def __init__(self, clean_config = None):
 		self.cc = {
-			'lower' : True,
-			'punctuation' : True,
-			'whitespace' : True,
-			'digits' : True,
+			'lower' : False,
+			'punctuation' : False,
+			'whitespace' : False,
+			'digit' : False,
 		}
+
+		# Override clean config and validation check
+		if clean_config != None:
+			for key, value in clean_config.iteritems():
+				if key in self.cc:
+					if value not in [True, False,1,0]:
+						print ("Invalid: Incorrect boolean value: "+str(value)+" for key: " + str(key))
+					else:
+						self.cc[key] = value
+				else:
+					print ("Invalid: Cleaner not recognized: " + str(key) + ", available Cleaners: " +
+																	 ", ".join(self.cc.keys()))
+
+		cleaners_applied = [key for key in self.cc if self.cc[key]]
+		if cleaners_applied:
+			print ("Applying Cleaners: " + ", ".join(cleaners_applied))
+		else:
+			print ("Warning: No cleaners in config")
+ 
 
 
 	def clean_element(self, txt):
@@ -119,7 +139,7 @@ class Cleaner:
 		if self.cc['whitespace']:
 			txt = "".join(txt.split()).strip()
 
-		if self.cc['digits']:
+		if self.cc['digit']:
 			txt = "".join(x for x in txt if x not in "0987654321")
 
 		return txt

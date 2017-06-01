@@ -5,7 +5,7 @@ clean_config = {
 	'lower' : True,
 	'punctuation' : True,
 	'whitespace' : True,
-	'digits' : True
+	'digit' : True
 }
 
 match_config = {
