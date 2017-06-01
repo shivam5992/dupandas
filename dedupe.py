@@ -191,8 +191,16 @@ class Dedupe:
 			elif each == 'input_data':
 				if 'pandas.core.frame.DataFrame' not in str(type(input_config[each])):
 					invalid_input = True
-					print ("Invalid: type " + str(type(input_config[each])) + " not recognized for " + 
+					print ("Invalid: Type " + str(type(input_config[each])) + " not recognized for " + 
 													str(each) + " need Pandas_Data_Frame")
+			elif each == 'unique_pairs':
+				if input_config[each] not in [True, False, 0, 1]:
+					print ("Invalid: Type " + str(type(input_config[each])) + " not recognized for " + 
+													str(each) + " need Boolean, setting default: True")
+					unique_pairs = True
+				else:
+					unique_pairs = input_config['unique_pairs']
+
 			elif 'str' not in str(type(input_config[each])):
 				print ("Invalid: Type " + str(type(input_config[each])) + ", for " + str(each) + " need str")
 				invalid_input = True
@@ -220,7 +228,8 @@ class Dedupe:
 			'_id' : input_config['_id'],
 			'colname' : input_config['column'],
 			'input_data' : input_config['input_data'],
-			'threshold' : threshold
+			'threshold' : threshold,
+			'unique_pairs' : unique_pairs
 		}
 		return config
 			
@@ -241,7 +250,6 @@ class Dedupe:
 
 		colname = config['colname']
 		input_df = config['input_data']
-		threshold = config['threshold']
 		scr_colname = config['scr_colname']
 		_id = config['_id']
 
@@ -267,7 +275,7 @@ class Dedupe:
 		# Matching Process
 		pairs[scr_colname] = pairs.apply(lambda row: self.match_records(row, cln_col), axis=1)
 		pairs = pairs.sort_values([scr_colname], ascending=[False])
-		pairs = pairs[pairs[scr_colname] >= threshold]
+		pairs = pairs[pairs[scr_colname] >= config['threshold']]
 		pairs = pairs[pairs[_id] != pairs[_id+"_"]]
 
 
@@ -276,4 +284,19 @@ class Dedupe:
 		output[_id] = pairs[_id]
 		output[_id+"_"] = pairs[_id+"_"]
 		output[scr_colname] = pairs[scr_colname]
+
+
+		# Remove Duplicate Pairs 
+		if config['unique_pairs']:
+			visited_hash = {}
+			remove_indexes = []
+			for index, row in output.iterrows():
+				hash_index = "-".join(sorted([str(row[_id]), str(row[_id+"_"])]))
+				if hash_index not in visited_hash:
+					visited_hash[hash_index] = 1
+				else:
+					remove_indexes.append(index)
+			output = output.drop(remove_indexes) 
+
+
 		return output

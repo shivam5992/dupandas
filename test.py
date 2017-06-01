@@ -18,11 +18,12 @@ match_config = {
 dupe = Dedupe(clean_config = clean_config, match_config = match_config)
 
 input_config = {
-	'input_data' : pd.read_csv('data/sample_data.csv'),
-	'column' : 'VillageName',
+	'input_data' : pd.read_csv('data/test_data.csv'),
+	'column' : 'city',
 	'score_column' : 'score',
 	'threshold' : 0.75,
 	'_id' : 'id',
+	'unique_pairs' : True
 }
 
 results = dupe.dedupe(input_config)
