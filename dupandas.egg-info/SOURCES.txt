@@ -1,0 +1,9 @@
+MANIFEST.in
+README.md
+dupandas
+setup.cfg
+setup.py
+dupandas.egg-info/PKG-INFO
+dupandas.egg-info/SOURCES.txt
+dupandas.egg-info/dependency_links.txt
+dupandas.egg-info/top_level.txt

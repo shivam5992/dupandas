@@ -1,1 +1,4 @@
+dist
+dupandas.egg-info
+*.egg*
 *.pyc
