@@ -2,8 +2,10 @@ from setuptools import setup
 
 setup(
 	name='dupandas',    
-	version='0.1.2',                          
-	scripts=['dupandas'],
+	packages=[
+          'dupandas',
+      ],
+	version='0.2',                          
 	description = 'python package to deduplicate text data in pandas dataframe using flexible string matching and cleaning',
   	author = 'Shivam Bansal',
   	author_email = 'shivam5992@gmail.com',
@@ -12,9 +14,6 @@ setup(
     long_description=open('README.md').read(),
     license='MIT',
     classifiers=(
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 2.5",
-        "Programming Language :: Python :: 2.6",
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python"
         ),
 )

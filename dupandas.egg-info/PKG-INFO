@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: dupandas
-Version: 0.1.2
+Version: 0.2
 Summary: python package to deduplicate text data in pandas dataframe using flexible string matching and cleaning
 Home-page: https://github.com/shivam5992/dupandas
 Author: Shivam Bansal
@@ -110,7 +110,33 @@ Description: # **dupandas:** data deduplication of text records in a pandas data
          5. Submit a **Pull request** 
 Keywords: pandas,deduplication,text cleaning,flexible matching
 Platform: UNKNOWN
-Classifier: Programming Language :: Python
-Classifier: Programming Language :: Python :: 2.5
-Classifier: Programming Language :: Python :: 2.6
-Classifier: Programming Language :: Python :: 2.7
+Classifier: P
+Classifier: r
+Classifier: o
+Classifier: g
+Classifier: r
+Classifier: a
+Classifier: m
+Classifier: m
+Classifier: i
+Classifier: n
+Classifier: g
+Classifier:  
+Classifier: L
+Classifier: a
+Classifier: n
+Classifier: g
+Classifier: u
+Classifier: a
+Classifier: g
+Classifier: e
+Classifier:  
+Classifier: :
+Classifier: :
+Classifier:  
+Classifier: P
+Classifier: y
+Classifier: t
+Classifier: h
+Classifier: o
+Classifier: n
