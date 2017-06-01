@@ -14,23 +14,23 @@ punctuations = string.punctuation
 
 class Matcher:
 	"""
-		python class for matching text records using different matching criterions. Currently, 
-		exact matching, levenshtein match, soundex and nysiis are supported. 
+	python class for matching text records using different matching criterions. Currently, 
+	exact matching, levenshtein match, soundex and nysiis are supported. 
 
-		use: default configuration
+	use: default configuration
 
-		match = Matcher()
-		score = match.match_elements(text1, text2)
-		# returns the confidence score of exact match between two strings 
-	
-		use: custom configuration
+	match = Matcher()
+	score = match.match_elements(text1, text2)
+	# returns the confidence score of exact match between two strings 
 
-		match_config = {
-			'exact' : True, 'levenshtein' : True, 'soundex' : True, 'nysiis' : True
-		}
-		match = Matcher(match_config)
-		score = match.match_elements(text1, text2)
-		# returns the confidence score of flexible match between two strings using criterions mentioned
+	use: custom configuration
+
+	match_config = {
+		'exact' : True, 'levenshtein' : True, 'soundex' : True, 'nysiis' : True
+	}
+	match = Matcher(match_config)
+	score = match.match_elements(text1, text2)
+	# returns the confidence score of flexible match between two strings using criterions mentioned
 	"""
 
 	def __init__(self, match_config = None):
@@ -147,10 +147,10 @@ class Cleaner:
 
 class Dedupe:
 	"""
-		python class to deduplicate columns of a pandas data frame, 
-		currently it supports single coulmn deduplication only. 
+	python class to deduplicate columns of a pandas data frame, 
+	currently it supports single coulmn deduplication only. 
 
-		makes use of Cleaner and Matcher class for text cleaning and matching purposes
+	makes use of Cleaner and Matcher class for text cleaning and matching purposes
 	"""
 
 	def __init__(self, clean_config = None, match_config = None):
