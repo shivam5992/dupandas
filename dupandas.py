@@ -123,7 +123,7 @@ class Cleaner:
  
 
 
-	def clean_element(self, txt):
+	def clean_text(self, txt):
 		"""
 		function to clean a text on the basis of configurations mentioned in clean config.
 		"""
@@ -172,7 +172,7 @@ class Dedupe:
 		function to obtain column value from relevant column and apply cleaning functions
 		"""
 
-		cleaned = self.clean.clean_element(_row_data[colname])
+		cleaned = self.clean.clean_text(_row_data[colname])
 		return cleaned
 
 	def validate_config(self, input_config):

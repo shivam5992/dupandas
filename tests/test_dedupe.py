@@ -1,11 +1,11 @@
-from dedupe import Dedupe
+from dupandas import Dedupe
 import pandas as pd 
 
 clean_config = {
 	'lower' : True,
 	'punctuation' : True,
 	'whitespace' : True,
-	'digit' : True
+	'digit' : True,
 }
 
 match_config = {
