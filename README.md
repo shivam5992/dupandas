@@ -16,7 +16,9 @@ Following python modules are required to use dupandas: **pandas, fuzzy, python-l
 ```
 **OR** if dependencies are already installed:
 
+```
     pip install dupandas
+```
     
 ## Usage : dupandas
 dupandas using default Matchers and Cleaners, Default Matcher and Cleaners are Exact Match and No Cleaning respectively.
