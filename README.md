@@ -90,11 +90,11 @@ Thanks for checking this work, Yes ofcourse there is a scope of improvement, Fee
 ## Contributing
 #### ToDos
 
-1. [ ]  V2: Add Support for multi column match
-2. [ ]  V2: Add More Matchers
-3. [ ]  V2: Add More Cleaners
-4. [ ]  V2: Improve Speed
-5. [ ]  V3: Add Support for multi column match
+1. [ ]  V3: Add Support for multi column match
+2. [ ]  V3: Add More Matchers
+3. [ ]  V3: Add More Cleaners
+4. [ ]  V2: Improve Speed 
+5. [ ]  V2: Remove Library Dependencies
 
 #### Steps 
  1. **Fork** the repo on GitHub
