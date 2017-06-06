@@ -18,7 +18,7 @@ match_config = {
 dupe = Dedupe(clean_config = clean_config, match_config = match_config)
 
 input_config = {
-	'input_data' : pd.read_csv('data/test_data.csv'),
+	'input_data' : pd.read_csv('../data/test_data.csv'),
 	'column' : 'city',
 	'score_column' : 'score',
 	'threshold' : 0.75,
@@ -27,4 +27,4 @@ input_config = {
 }
 
 results = dupe.dedupe(input_config)
-results.to_csv('data/results.csv')
+results.to_csv('../data/results.csv')
