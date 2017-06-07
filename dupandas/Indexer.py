@@ -21,34 +21,30 @@ def _index_data(inputDF, colname):
 def _search_index(my_index, text):
 	searcher = my_index.searcher()
 
-	res = searcher.search(FuzzyTerm("name", unicode(text), maxdist=1, prefixlength=1))
-	# res1 = searcher.search(FuzzyTerm("name", unicode(text).split(), maxdist=5, prefixlength=1))
+	res = searcher.search(FuzzyTerm("name", unicode(text), maxdist=5, prefixlength=1))
+	res1 = searcher.search(FuzzyTerm("name", unicode(text).split(), maxdist=5, prefixlength=1))
 
 	visited = {}
 	for r in res:
 		if r['name'] not in visited:
 			visited[r['name']] = 1
 
-	# for r in res1:
-	# 	if r['name'] not in visited:
-	# 		visited[r['name']] = 1
+	for r in res1:
+		if r['name'] not in visited:
+			visited[r['name']] = 1
 
 	searcher.close()
-
 	candidates = visited.keys()
 	return candidates
 	
 def _create_pairs(inpDF, colname, ID):
 
 	# create index
-	# _index = _index_data(inpDF, colname)
-	print "ER"
+	_index = _index_data(inpDF, colname)
 	_index = index.open_dir("indexdir", indexname="idx_name")
-	print "ER1 "
 
 	# search relevant pairs 
 	candidates = inpDF.apply(lambda x: _search_index(_index, x[colname]), axis = 1)
-	print "#$"
 
 	# create cartesian pairs
 	pairs = []
