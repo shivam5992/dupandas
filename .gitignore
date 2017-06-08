@@ -1,4 +1,6 @@
-dupandas.egg-info
+lucene_index/
+dist/
+dupandas.egg-info/
 *idx*
 indexdir
 dist
