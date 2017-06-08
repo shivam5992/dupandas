@@ -90,11 +90,11 @@ Thanks for checking this work, Yes ofcourse there is a scope of improvement, Fee
 ## Contributing
 #### ToDos
 
-1. [ ]  V3: Add Support for multi column match
-2. [ ]  V3: Add More Matchers
-3. [ ]  V3: Add More Cleaners
-4. [ ]  V2: Improve Speed 
-5. [ ]  V2: Remove Library Dependencies
+1. [ ]  V2: Add Support for multi column match
+2. [ ]  V2: Add More Matchers
+3. [ ]  V2: Add More Cleaners
+4. [ ]  V2: Remove Library Dependencies
+5. [ ]  V2: Longer Texts
 
 #### Steps 
  1. **Fork** the repo on GitHub
@@ -102,3 +102,12 @@ Thanks for checking this work, Yes ofcourse there is a scope of improvement, Fee
  3. **Commit** changes to your own branch
  4. **Push** your work back up to your fork
  5. Submit a **Pull request** 
+
+
+ #### Links 
+
+- https://askubuntu.com/questions/584529/libjvm-so-cannot-open-shared-object-file-no-such-file-or-directory
+
+- http://jaysliu.blogspot.in/2013/12/learning-pylucene-by-example.html
+
+- export LD_LIBRARY_PATH=/usr/lib/jvm/java-8-oracle/jre/lib/amd64/server

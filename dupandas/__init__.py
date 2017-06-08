@@ -12,7 +12,8 @@ import string
 punctuations = string.punctuation
 
 # Imports for Indexer 
-from Indexer import _create_pairs
+from Indexer import LuceneIndexer
+LI = LuceneIndexer()
 
 class Matcher:
 	"""
@@ -288,13 +289,13 @@ class Dedupe:
 
 
 		# Create Cartesian Products
-		cartesian_index = '_i_n_d_e_x'
-		input_df[cartesian_index] = 0
-		temp_df[cartesian_index] = 0
-		pairs = pd.merge(input_df, temp_df, on=cartesian_index)
+		# cartesian_index = '_i_n_d_e_x'
+		# input_df[cartesian_index] = 0
+		# temp_df[cartesian_index] = 0
+		# pairs = pd.merge(input_df, temp_df, on=cartesian_index)
 
 		# Create Cartesian Pairs using Indexed Data 
-		# pairs = _create_pairs(input_df, cln_col, _id)
+		pairs = LI._create_pairs(input_df, cln_col, _id)
 		
 		# Matching Process
 		pairs[scr_colname] = pairs.apply(lambda row: self.match_records(row, cln_col), axis=1)
