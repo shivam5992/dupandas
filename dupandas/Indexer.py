@@ -1,7 +1,8 @@
-from lucene import *
 import pandas as pd 
-import lucene
 
+from lucene import Document, Field, RAMDirectory, Term
+from lucene import IndexWriter, WhitespaceAnalyzer, FuzzyQuery, IndexSearcher
+import lucene
 lucene.initVM()
 
 class LuceneIndexer:

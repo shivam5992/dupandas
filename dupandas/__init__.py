@@ -12,8 +12,6 @@ import string
 punctuations = string.punctuation
 
 # Imports for Indexer 
-from Indexer import LuceneIndexer
-LI = LuceneIndexer()
 
 class Matcher:
 	"""
@@ -160,6 +158,7 @@ class Dedupe:
 		self.clean = Cleaner(clean_config)
 		self.match = Matcher(match_config)
 
+
 	def match_records(self, _row_data, colname):
 		""" 
 		function to obtain column values from two columns and apply matching functions
@@ -224,6 +223,14 @@ class Dedupe:
 				else:
 					unique_pairs = input_config['unique_pairs']
 
+			elif each == 'indexing':
+				if input_config[each] not in [True, False, 0, 1]:
+					print ("Invalid: Type " + str(type(input_config[each])) + " not recognized for " + 
+													str(each) + " need Boolean, setting default: False")
+					indexing = False
+				else:
+					indexing = input_config['indexing']
+
 			elif 'str' not in str(type(input_config[each])):
 				print ("Invalid: Type " + str(type(input_config[each])) + ", for " + str(each) + " need str")
 				invalid_input = True
@@ -252,7 +259,8 @@ class Dedupe:
 			'colname' : input_config['column'],
 			'input_data' : input_config['input_data'],
 			'threshold' : threshold,
-			'unique_pairs' : unique_pairs
+			'unique_pairs' : unique_pairs,
+			'indexing' : indexing
 		}
 		return config
 			
@@ -281,22 +289,28 @@ class Dedupe:
 		cln_col = "_cln_"+colname
 		input_df[cln_col] = input_df.apply(lambda row: self.clean_records(row, colname), axis=1)
 		
+		# Create Cartesian Pairs
+		print ("Applying Indexing: " + str(config["indexing"]))
+		if config['indexing']:
 
-		# Create another dataframe with same column
-		temp_df = pd.DataFrame()
-		temp_df[_id+"_"] = input_df[_id]
-		temp_df[cln_col+"_"] = input_df[cln_col]
+			# Lazy Import : Any Suggestions to Improve ? 
+			from Indexer import LuceneIndexer
+
+			# cartesian pairs using indexing by lucene
+			LI = LuceneIndexer()
+			pairs = LI._create_pairs(input_df, cln_col, _id)
+		else:
+			# default cartesian pairs (slow)
+			temp_df = pd.DataFrame()
+			temp_df[_id+"_"] = input_df[_id]
+			temp_df[cln_col+"_"] = input_df[cln_col]
+
+			cartesian_index = '_i_n_d_e_x'
+			input_df[cartesian_index] = 0
+			temp_df[cartesian_index] = 0
+			pairs = pd.merge(input_df, temp_df, on=cartesian_index)
 
 
-		# Create Cartesian Products
-		# cartesian_index = '_i_n_d_e_x'
-		# input_df[cartesian_index] = 0
-		# temp_df[cartesian_index] = 0
-		# pairs = pd.merge(input_df, temp_df, on=cartesian_index)
-
-		# Create Cartesian Pairs using Indexed Data 
-		pairs = LI._create_pairs(input_df, cln_col, _id)
-		
 		# Matching Process
 		pairs[scr_colname] = pairs.apply(lambda row: self.match_records(row, cln_col), axis=1)
 		pairs = pairs.sort_values([scr_colname], ascending=[False])
@@ -322,6 +336,5 @@ class Dedupe:
 				else:
 					remove_indexes.append(index)
 			output = output.drop(remove_indexes) 
-
 
 		return output

@@ -5,6 +5,8 @@
 
 dupandas is a python package to perform data deduplication on columns of a pandas dataframe using flexible text matching. It is compatible with both versions of python (2.x and 3.x). dupandas can find duplicate any kinds of text records in the pandas data. It comprises of sophisticated Matchers that can handle spelling differences and phonetics. It also comprises of several Cleaners, which can be used to clean up the noise present in the text data such as punctuations, digits, casing etc.
 
+For fast computations, dupandas uses lucene based text indexing. In the input_config, if "indexing" = True, then it indexes the dataset in RAMDirectory which is used to identify and search similar strings. Check out the instructions of installing PyLucene below.
+
 The good part of dupandas is that it's Matchers and Cleaner functions can be used as standalone packages while working with different problems of text data.
 
 
@@ -19,7 +21,11 @@ Following python modules are required to use dupandas: **pandas, fuzzy, python-l
 ```
     pip install dupandas
 ```
-    
+
+**OPTIONAL** For faster implementation dupandas with indexing feature is recommended. **PyLucene** Installation : Refer to [this](http://installion.co.uk/ubuntu/vivid/universe/p/pylucene/install/index.html) link. 
+
+**Note:** The use of indexing can reduce the overall computation time of completion to one third.
+
 ## Usage : dupandas
 dupandas using default Matchers and Cleaners, Default Matcher and Cleaners are Exact Match and No Cleaning respectively.
 
@@ -61,7 +67,8 @@ Other options in input_config
         '_id' : 'unique_id_column_of_dataset',
         'score_column' : 'name_of_the_column_for_confidence_score',
         'threshold' : 0.75, # float value of threshold
-        'unique_pairs' : True # boolean to get unique (A=B) or duplicate (A=B and B=A) results
+        'unique_pairs' : True, # boolean to get unique (A=B) or duplicate (A=B and B=A) results
+        'indexing' : False # Boolean to set lucene indexing = True / False, Default: False
         }
 ```
 
@@ -91,10 +98,9 @@ Thanks for checking this work, Yes ofcourse there is a scope of improvement, Fee
 #### ToDos
 
 1. [ ]  V2: Add Support for multi column match
-2. [ ]  V2: Add More Matchers
-3. [ ]  V2: Add More Cleaners
-4. [ ]  V2: Remove Library Dependencies
-5. [ ]  V2: Longer Texts
+2. [ ]  V2: Add More Matchers, Cleaners
+3. [ ]  V2: Remove Library Dependencies
+4. [ ]  V2: Handle Longer Texts, Optimize Speed
 
 #### Steps 
  1. **Fork** the repo on GitHub
@@ -102,12 +108,3 @@ Thanks for checking this work, Yes ofcourse there is a scope of improvement, Fee
  3. **Commit** changes to your own branch
  4. **Push** your work back up to your fork
  5. Submit a **Pull request** 
-
-
- #### Links 
-
-- https://askubuntu.com/questions/584529/libjvm-so-cannot-open-shared-object-file-no-such-file-or-directory
-
-- http://jaysliu.blogspot.in/2013/12/learning-pylucene-by-example.html
-
-- export LD_LIBRARY_PATH=/usr/lib/jvm/java-8-oracle/jre/lib/amd64/server
