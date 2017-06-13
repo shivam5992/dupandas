@@ -100,7 +100,7 @@ Thanks for checking this work, Yes ofcourse there is a scope of improvement, Fee
 1. [ ]  V2: Add Support for multi column match
 2. [ ]  V2: Add More Matchers, Cleaners
 3. [ ]  V2: Remove Library Dependencies
-4. [ ]  V2: Handle Longer Texts, Optimize Speed
+4. [ ]  V2: Handle Longer Texts, Optimize Speed, Lucene Time Optimize, fix input bugs
 
 #### Steps 
  1. **Fork** the repo on GitHub

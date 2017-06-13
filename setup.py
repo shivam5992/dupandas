@@ -5,7 +5,7 @@ setup(
 	packages=[
           'dupandas',
       ],
-	version='0.2',                          
+	version='0.3.1',                          
 	description = 'python package to deduplicate text data in pandas dataframe using flexible string matching and cleaning',
   	author = 'Shivam Bansal',
   	author_email = 'shivam5992@gmail.com',
