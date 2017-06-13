@@ -66,10 +66,10 @@ class LuceneIndexer:
 				
 				# Matches : Value + Score
 				score = float(candidate.split("score=")[1].replace(">","").strip())
+				
 				value = searcher.doc(scoreDocs[i].doc).get("field")
 				if value in results:
 					continue
-
 				results.append((idd, text, value))
 
 		return results
@@ -81,23 +81,37 @@ class LuceneIndexer:
 		in a pandas dataframe 
 		"""
 
+		lookup_dir = {}
+		for i, row in inpDF.iterrows():
+			if row[colname] not in lookup_dir:
+				lookup_dir[row[colname]] = []
+			else:
+				lookup_dir[row[colname]].append(row[idd])
+
 		pairs = []
 		directory = self._createIndex(inpDF, colname)
 
 		searcher = IndexSearcher(directory, True)
 		matches = inpDF.apply(lambda x: self._searchIndex(searcher, x, colname, idd), axis = 1)
-		
+
+		captured_candidates = {}
 		for match_pair in matches:
 			for matched in match_pair:
-				value_index = inpDF[inpDF[colname] == matched[2]].index.tolist()
+				# value_index = inpDF[inpDF[colname] == matched[2]].index.tolist()
+				value_index = lookup_dir[matched[2]]
 				for cell_index in value_index:
 					if matched[0] != cell_index:
-						row = []
-						row.append(matched[0])
-						row.append(matched[1])
-						row.append(cell_index)
-						row.append(matched[2])
-						pairs.append(row)
+
+						rstring = "-".join(sorted([str(matched[0]), str(cell_index)]))
+						if rstring not in captured_candidates:
+							captured_candidates[rstring] = 1 
+
+							row = []
+							row.append(matched[0])
+							row.append(matched[1])
+							row.append(cell_index)
+							row.append(matched[2])
+							pairs.append(row)
 
 		searcher.close()
 		directory.close()

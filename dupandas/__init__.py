@@ -200,12 +200,21 @@ class Dedupe:
 				invalid_input = True
 			else:
 				input_df = input_config['input_data']
+
+		## Terminate if validation is failed
+		if invalid_input:
+			print ("Terminating !!!")
+			exit(0)
+
+		# Defaults
+		threshold = 0.0
+		unique_pairs = True
+		indexing = False
 		
 		# Datatype Check 
 		for each in input_config:
 			if each == 'threshold':
 				if 'float' not in  str(type(input_config[each])):
-					threshold = 0.0
 					print ("Invalid: Type: " + str(type(input_config[each])) + " not recognized for " +
 										 str(each) + " need float, setting default: 0.0")
 				else:
@@ -219,7 +228,6 @@ class Dedupe:
 				if input_config[each] not in [True, False, 0, 1]:
 					print ("Invalid: Type " + str(type(input_config[each])) + " not recognized for " + 
 													str(each) + " need Boolean, setting default: True")
-					unique_pairs = True
 				else:
 					unique_pairs = input_config['unique_pairs']
 
@@ -227,20 +235,28 @@ class Dedupe:
 				if input_config[each] not in [True, False, 0, 1]:
 					print ("Invalid: Type " + str(type(input_config[each])) + " not recognized for " + 
 													str(each) + " need Boolean, setting default: False")
-					indexing = False
 				else:
 					indexing = input_config['indexing']
 
-			elif 'str' not in str(type(input_config[each])):
-				print ("Invalid: Type " + str(type(input_config[each])) + ", for " + str(each) + " need str")
-				invalid_input = True
+			elif each in ['column', '_id', 'score_column']:
+				if 'str' not in str(type(input_config[each])):
+					print ("Invalid: Type " + str(type(input_config[each])) + ", for " + str(each) + " need str")
+					invalid_input = True
 
+			else:
+				print ("Warning: Key not recognized - " + str(each))
+					
+
+		## Terminate if validation is failed
+		if invalid_input:
+			print ("Terminating !!!")
+			exit(0)
 
 		## Availability Check
 		keys = ['_id', 'column']
 		for key in keys:
 			if input_config[key] not in input_config['input_data']:
-				print ("Invalid: column - " + str(key) + " not found")
+				print ("Invalid: column - " + str(key) + " not present in dataframe")
 				invalid_input = True
 
 		## Terminate if validation is failed
@@ -309,7 +325,6 @@ class Dedupe:
 			input_df[cartesian_index] = 0
 			temp_df[cartesian_index] = 0
 			pairs = pd.merge(input_df, temp_df, on=cartesian_index)
-
 
 		# Matching Process
 		pairs[scr_colname] = pairs.apply(lambda row: self.match_records(row, cln_col), axis=1)
