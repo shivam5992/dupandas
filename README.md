@@ -7,7 +7,7 @@ dupandas is a python package to perform data deduplication on columns of a panda
 
 For fast computations, dupandas uses lucene based text indexing. In the input_config, if "indexing" = True, then it indexes the dataset in RAMDirectory which is used to identify and search similar strings. Check out the instructions of installing PyLucene below.
 
-The good part of dupandas is that it's Matchers and Cleaner functions can be used as standalone packages while working with different problems of text data.
+The beautiful part of dupandas is that it's Matchers, Cleaners and Indexing functions can be used as standalone packages while working with text data.
 
 
 ## Installation
@@ -22,9 +22,20 @@ Following python modules are required to use dupandas: **pandas, fuzzy, python-l
     pip install dupandas
 ```
 
-**OPTIONAL** For faster implementation dupandas with indexing feature is recommended. **PyLucene** Installation : Refer to [this](http://installion.co.uk/ubuntu/vivid/universe/p/pylucene/install/index.html) link. 
+**OPTIONAL** For faster implementation dupandas with indexing feature is recommended. dupandas uses PuLucene for data indexing purposes.  
+**PyLucene Installation:** Please note that for lucene indexing, java needs to be installed. Java 8 is recommended. Refer to [this](https://www.digitalocean.com/community/tutorials/how-to-install-java-on-ubuntu-with-apt-get) link
 
-**Note:** The use of indexing can reduce the overall computation time of completion to one third.
+```
+    sudo apt-get update
+    sudo apt-get install pylucene
+
+    After Installation, edit ~/.bashrc file, and add the following line at the end 
+    export LD_LIBRARY_PATH=/usr/lib/jvm/java_folder_name/jre/lib/amd64/server
+    
+    example: export LD_LIBRARY_PATH=/usr/lib/jvm/java-8-oracle/jre/lib/amd64/server
+```
+
+**Note:** The use of indexing can reduce the overall time of computation and execution to one third of original.
 
 ## Usage : dupandas
 dupandas using default Matchers and Cleaners, Default Matcher and Cleaners are Exact Match and No Cleaning respectively.
@@ -100,7 +111,7 @@ Thanks for checking this work, Yes ofcourse there is a scope of improvement, Fee
 1. [ ]  V2: Add Support for multi column match
 2. [ ]  V2: Add More Matchers, Cleaners
 3. [ ]  V2: Remove Library Dependencies
-4. [ ]  V2: Handle Longer Texts, Optimize Speed, Lucene Time Optimize, fix input bugs
+4. [ ]  V2: Handle Longer Texts, Command Line Arguments
 
 #### Steps 
  1. **Fork** the repo on GitHub
