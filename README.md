@@ -109,7 +109,7 @@ Thanks for checking this work, Yes ofcourse there is a scope of improvement, Fee
 #### ToDos
 
 1. [ ]  V2: Add Support for multi column match
-2. [ ]  V2: Add More Matchers, Cleaners
+2. [ ]  V2: Add Matchers, Cleaners
 3. [ ]  V2: Remove Library Dependencies
 4. [ ]  V2: Handle Longer Texts, Command Line Arguments
 

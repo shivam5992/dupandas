@@ -11,7 +11,6 @@ from Levenshtein import ratio
 import string 
 punctuations = string.punctuation
 
-# Imports for Indexer 
 
 class Matcher:
 	"""
